@@ -3,13 +3,12 @@
 namespace TevoHarvester\Jobs;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Support\Facades\Event;
 use TevoHarvester\Events\ResourceUpdateWasCompleted;
 use TevoHarvester\Tevo\Harvest;
 use TicketEvolution\Laravel\TEvoFacade as Tevo;
 
-class UpdateResourceJob extends Job implements SelfHandling
+class UpdateResourceJob extends Job
 {
 
     /**

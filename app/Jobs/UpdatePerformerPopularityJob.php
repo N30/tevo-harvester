@@ -3,13 +3,12 @@
 namespace TevoHarvester\Jobs;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Bus\SelfHandling;
 use Illuminate\Support\Facades\Event;
 use TevoHarvester\Events\ResourceUpdateWasCompleted;
 use TevoHarvester\Tevo\Harvest;
 use TicketEvolution\Laravel\TEvoFacade as Tevo;
 
-class UpdatePerformerPopularityJob extends Job implements SelfHandling
+class UpdatePerformerPopularityJob extends Job
 {
 
     /**
@@ -45,8 +44,8 @@ class UpdatePerformerPopularityJob extends Job implements SelfHandling
         $this->harvest = $harvest;
         $this->last_category_id = $last_category_id;
         $this->settings = [
-            'startPage'                 => (int)1,
-            'perPage'                   => (int)100,
+            'page'                      => (int)1,
+            'per_page'                  => (int)100,
             'order_by'                  => 'performers.popularity_score DESC',
             'only_with_upcoming_events' => (int)1,
             'category_tree'             => (int)1,
@@ -94,7 +93,6 @@ class UpdatePerformerPopularityJob extends Job implements SelfHandling
         foreach ($results[$this->harvest->resource] as $result) {
             yield $result;
         }
-
     }
 
 

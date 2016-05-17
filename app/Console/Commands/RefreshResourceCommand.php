@@ -5,13 +5,15 @@ namespace TevoHarvester\Console\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use TevoHarvester\Jobs\UpdatePerformerPopularityJob;
 use TevoHarvester\Jobs\UpdateResourceJob;
+use TevoHarvester\Tevo\Category;
 use TevoHarvester\Tevo\Harvest;
 
 
 class RefreshResourceCommand extends Command
 {
-    use DispatchesJobs;
+    use DispatchesJobs, HandlePopularityTrait;
 
     /**
      * The name and signature of the console command.
@@ -50,6 +52,21 @@ class RefreshResourceCommand extends Command
      */
     public function handle()
     {
+        if ($this->option('action') === 'popularity') {
+            $this->handlePopularity();
+        } else {
+            $this->handleRefresh();
+        }
+    }
+
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    protected function handleRefresh()
+    {
         $resource = $this->argument('resource');
         $action = $this->option('action');
         $startPage = (int)$this->option('startPage');
@@ -81,4 +98,5 @@ class RefreshResourceCommand extends Command
         $this->dispatch($job);
 
     }
+
 }

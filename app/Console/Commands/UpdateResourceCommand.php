@@ -5,15 +5,13 @@ namespace TevoHarvester\Console\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use TevoHarvester\Jobs\UpdatePerformerPopularityJob;
 use TevoHarvester\Jobs\UpdateResourceJob;
-use TevoHarvester\Tevo\Category;
 use TevoHarvester\Tevo\Harvest;
 
 
 class UpdateResourceCommand extends Command
 {
-    use DispatchesJobs;
+    use DispatchesJobs, HandlePopularityTrait;
 
     /**
      * The name and signature of the console command.
@@ -106,48 +104,6 @@ class UpdateResourceCommand extends Command
         }
         $this->info($message);
         $this->dispatch($job);
-
-    }
-
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    protected function handlePopularity()
-    {
-        $resource = 'performers';
-        $action = 'popularity';
-
-        try {
-            $harvest = Harvest::where('resource', $resource)->where('action', $action)->firstOrFail();
-        } catch (\Exception $e) {
-            $this->info('There is no existing action for updating ' . ucwords($action) . ' ' . ucwords($resource) . '.');
-            exit('Nothing was updated.');
-        }
-
-        /**
-         * Get all the categories and then loop through them creating an
-         * UpdatePerformerPopularityJob for each one.
-         */
-        try {
-            $categories = Category::active()->orderBy('id')->get();
-        } catch (\Exception $e) {
-            abort(404, 'There are no categories yet. Please ensure you have run the Active Categories job.');
-        }
-
-        $message = 'Updating the popularity_score for the 100 most popular Performers in each Category.';
-        $this->info($message);
-
-        // Get the last category_id so we can later detect that the Job for that
-        // category_id has completed in order to know to fire the ResourceUpdateWasCompleted Event
-        $last_category_id = $categories->last()->id;
-
-        foreach ($categories as $category) {
-            $job = new UpdatePerformerPopularityJob($harvest, $category->id, $last_category_id);
-            $this->dispatch($job);
-        }
 
     }
 }

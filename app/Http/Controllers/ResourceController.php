@@ -220,7 +220,7 @@ class ResourceController extends Controller
          * UpdatePerformerPopularityJob for each one.
          */
         try {
-            $categories = Category::active()->orderBy('id')->get();
+            $categories = Category::all(['id']);
         } catch (\Exception $e) {
             abort(404, 'There are no categories yet. Please ensure you have run the Active Categories job.');
         }
@@ -229,14 +229,14 @@ class ResourceController extends Controller
         // category->id has completed in order to know to fire the ResourceUpdateWasCompleted Event
         $last_category_id = $categories->last()->id;
 
-        foreach ($categories as $category) {
-            $job = new UpdatePerformerPopularityJob($harvest, $category->id, $last_category_id);
+        foreach ($categories->toArray() as $category) {
+            $job = new UpdatePerformerPopularityJob($harvest, $category['id'], $last_category_id);
 
             $this->dispatch($job);
 
         }
 
-        return view('resource', [
+        return view('resource-harvest', [
             'pageTitle' => 'Performers | Popularity | TEvo Harvester',
             'job'       => $job,
         ]);
